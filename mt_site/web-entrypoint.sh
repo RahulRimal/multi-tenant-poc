@@ -12,4 +12,5 @@ python manage.py migrate_all
 
 echo 'yes' | python manage.py collectstatic
 
-gunicorn -c gunicorn.conf.py mt_site.wsgi:application
+#gunicorn -c gunicorn.conf.py mt_site.wsgi:application
+python manage.py runserver 

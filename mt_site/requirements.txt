@@ -1,19 +1,20 @@
-Django==3.1.8
-psycopg2-binary==2.8.5
-djangorestframework==3.11.2
+Django==5.2.5
+psycopg2-binary==2.9.10
+djangorestframework==3.16.1
 
 pymodm==0.4.3
-requests==2.24.0
+requests==2.32.4
 
-Celery==4.4.6
-elasticsearch==7.9.1
-django-cors-headers==3.5.0
-gunicorn==20.0.4
-redis==3.5.3
-django-celery-beat==2.1.0
+Celery==5.5.3
+elasticsearch==9.1.0
+django-cors-headers==4.7.0
+gunicorn==23.0.0
+redis==6.3.0
+django-celery-beat==2.8.1
 
-dj-database-url==0.5.0
-django-cache-url==3.2.2
+dj-database-url==3.0.1
+django-cache-url==3.4.5
 
-django-redis==4.12.1
-environs==9.3.1
+django-redis==6.0.0
+environs==14.3.0
+

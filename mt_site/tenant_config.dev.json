@@ -1,37 +1,55 @@
 {
-    "mapping_metadata": {
-        "POSTGRES_URL": "orm_config_django_orm_default"
-    },
-    "tenant_metadata": {
-        "tenant-1.test.com": {
-            "mt_site": {
-                "orm_config": {
-                    "django_orm": {
-                        "default": {
-                            "HOST": "postgres-db",
-                            "PORT": "5432",
-                            "USER": "test_user",
-                            "PASSWORD": "password",
-                            "NAME": "tenant_1_db"
-                        }
-                    }
-                }
+  "mapping_metadata": {
+    "POSTGRES_URL": "orm_config_django_orm_default"
+  },
+  "tenant_metadata": {
+    "tenant-1.test.com": {
+      "mt_site": {
+        "orm_config": {
+          "django_orm": {
+            "default": {
+              "HOST": "postgres-db",
+              "PORT": "5432",
+              "USER": "test_user",
+              "PASSWORD": "password",
+              "NAME": "tenant_1_db"
             }
+          }
         },
-        "tenant-2.test.com": {
-            "mt_site": {
-                "orm_config": {
-                    "django_orm": {
-                        "default": {
-                            "HOST": "postgres-db",
-                            "PORT": "5432",
-                            "USER": "test_user",
-                            "PASSWORD": "password",
-                            "NAME": "tenant_2_db"
-                        }
-                    }
-                }
+        "cache_config": {
+          "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://redis-db:6379/6",
+            "OPTIONS": {
+              "CLIENT_CLASS": "django_redis.client.DefaultClient"
             }
+          }
         }
+      }
+    },
+    "tenant-2.test.com": {
+      "mt_site": {
+        "orm_config": {
+          "django_orm": {
+            "default": {
+              "HOST": "postgres-db",
+              "PORT": "5432",
+              "USER": "test_user",
+              "PASSWORD": "password",
+              "NAME": "tenant_2_db"
+            }
+          }
+        },
+        "cache_config": {
+          "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": "redis://redis-db:6379/7",
+            "OPTIONS": {
+              "CLIENT_CLASS": "django_redis.client.DefaultClient"
+            }
+          }
+        }
+      }
     }
+  }
 }
