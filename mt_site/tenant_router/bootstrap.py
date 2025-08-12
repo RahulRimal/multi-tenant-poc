@@ -1,9 +1,9 @@
 import logging
 from importlib import import_module
+from typing import Protocol
 
 from tenant_router.cache.config_manager import cache_config_manager
 from tenant_router.conf import settings
-
 from tenant_router.event_queue.manager import event_queue_manager
 from tenant_router.exceptions import ImproperlyConfiguredError
 from tenant_router.celery.manager import celery_manager
@@ -24,31 +24,26 @@ def on_worker_exit():
     pubsub_service.stop()
 
 
+class BootstrapComponent(Protocol):
+    def bootstrap(self) -> None: ...
+
+
 class _BootstrapSettingsParser:
-    def __init__(self):
+    def __init__(self) -> None:
         self._bootstrap_seq = []
 
-    def _validate_type(self):
+    def _validate_type(self) -> None:
         bootstrap_seq = settings.TENANT_ROUTER_BOOTSTRAP_SETTINGS
-        if not (
-                isinstance(bootstrap_seq, list)
-                or isinstance(bootstrap_seq, tuple)
-        ):
+        if not (isinstance(bootstrap_seq, list) or isinstance(bootstrap_seq, tuple)):
             raise ImproperlyConfiguredError(
-                'TENANT_ROUTER_BOOTSTRAP_SETTINGS should either be '
-                'a `list` or a `tuple`'
+                "TENANT_ROUTER_BOOTSTRAP_SETTINGS should either be "
+                "a `list` or a `tuple`"
             )
 
-        if not all(
-                isinstance(bootstrap_cls, str)
-                for bootstrap_cls in bootstrap_seq
-        ):
+        if not all(isinstance(bootstrap_cls, str) for bootstrap_cls in bootstrap_seq):
             raise ImproperlyConfiguredError(
-                'TENANT_ROUTER_BOOTSTRAP_SETTINGS should contain only '
-                'strings'
+                "TENANT_ROUTER_BOOTSTRAP_SETTINGS should contain only strings"
             )
-
-        return True
 
     def _initialize_bootstrap_seq(self):
         for bootstrap_cls in settings.TENANT_ROUTER_BOOTSTRAP_SETTINGS:
@@ -56,8 +51,8 @@ class _BootstrapSettingsParser:
             self._bootstrap_seq.append(klass())
 
     def parse(self):
-        if self._validate_type():
-            self._initialize_bootstrap_seq()
+        self._validate_type()
+        self._initialize_bootstrap_seq()
 
         return self._bootstrap_seq
 
@@ -66,24 +61,23 @@ _bootstrap_settings_parser = _BootstrapSettingsParser()
 
 
 class _AppBootStrapper:
-
     def __init__(self):
-        self._patches = [
-            'tenant_router.patches.thread_pool',
-            'tenant_router.patches.process_pool',
+        self._patches: list[str] = [
+            "tenant_router.patches.thread_pool",
+            "tenant_router.patches.process_pool",
         ]
 
-        self._bootstrap_sequence = [
+        self._bootstrap_sequence: list[BootstrapComponent] = [
             tenant_context_manager,
             cache_config_manager,
             orm_managers,
             celery_manager,
             pubsub_proxy,
-            event_queue_manager
+            event_queue_manager,
         ]
 
     def _init_bootstrap_sequence(self):
-        external_bootstrap_seq = _bootstrap_settings_parser.parse()
+        external_bootstrap_seq: list = _bootstrap_settings_parser.parse()
         self._bootstrap_sequence.extend(external_bootstrap_seq)
 
     def _run_patches(self):
@@ -92,10 +86,8 @@ class _AppBootStrapper:
                 import_module(patch)
             except Exception as e:
                 raise Exception(
-                    "Unable to import patch module {patch} due "
-                    "to: {exc_info}".format(
-                        patch=patch,
-                        exc_info=e
+                    "Unable to import patch module {patch} due to: {exc_info}".format(
+                        patch=patch, exc_info=e
                     )
                 )
 

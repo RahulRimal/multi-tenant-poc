@@ -5,17 +5,19 @@ from tenant_router.constants import constants
 
 
 class _TenantConfigLoader:
-
     def _load_mapping_metadata(self, config_json):
         mapping_metadata = config_json.get(constants.MAPPING_METADATA, None)
         if mapping_metadata:
-            self.cache.set(
-                constants.NORMALIZED_MAPPING_METADATA, mapping_metadata
-            )
+            self.cache.set(constants.NORMALIZED_MAPPING_METADATA, mapping_metadata)
 
     def _load_tenant_metadata(self, config_json):
         from tenant_router.orm_backends.utils import (
-            ORM_CONFIG_PREFIX_KEY, construct_conn_alias
+            ORM_CONFIG_PREFIX_KEY,
+            construct_conn_alias,
+        )
+        from tenant_router.cache.utils import (
+            CACHE_CONFIG_PREFIX_KEY,
+            construct_cache_alias,
         )
         from tenant_router.managers.tenant_context import TENANT_IDS_KEY
 
@@ -29,25 +31,28 @@ class _TenantConfigLoader:
 
                 for service_name, service_config in tenant_metadata.items():
                     for component_name, component_config in service_config.items():
-
                         if component_name == ORM_CONFIG_PREFIX_KEY:
                             for orm_key, orm_config in component_config.items():
                                 for template_alias, db_config in orm_config.items():
                                     conn_alias = construct_conn_alias(
                                         tenant_alias=tenant_alias,
                                         orm_key=orm_key,
-                                        template_alias=template_alias
+                                        template_alias=template_alias,
                                     )
-
                                     final_config[conn_alias] = db_config
+
+                        elif component_name == CACHE_CONFIG_PREFIX_KEY:
+                            for cache_alias, cache_config in component_config.items():
+                                full_cache_alias = construct_cache_alias(
+                                    tenant_alias=tenant_alias,
+                                    template_alias=cache_alias,
+                                )
+                                final_config[full_cache_alias] = cache_config
 
             for key, value in final_config.items():
                 self.cache.set(key, value)
 
-            self.cache.set(
-                TENANT_IDS_KEY,
-                list(all_tenant_metadata.keys())
-            )
+            self.cache.set(TENANT_IDS_KEY, list(all_tenant_metadata.keys()))
 
     def load(self, config_json, **options):
         if config_json:
